@@ -1,6 +1,4 @@
 #pragma once
-#include <algorithm>
-#include <iostream>
 #include <string>
 #include <fstream>
 #include <unordered_map>
@@ -87,7 +85,7 @@ public:
 	}
 
 	template <class T>
-	T get_key_value( const std::string& name ) {
+	std::optional<T> get_key_value( const std::string& name ) {
 		for ( auto i = 0; i < key_block->value_count; i++ ) {
 			const auto value = reinterpret_cast<value_block_t*>( reinterpret_cast<int*>( key_block->offsets + this->main_root + 4 )[i] + this->main_root );
 			if ( !value || std::string( value->name, value->name_len ) != name )
@@ -99,7 +97,7 @@ public:
 
 			if constexpr ( std::is_same_v<T, std::string> ) {
 				if ( value->value_type != REG_SZ && value->value_type != REG_EXPAND_SZ )
-					return "";
+					return std::nullopt;
 
 				std::string text;
 				for ( auto j = 0; j < ( value->size & 0xffff ); j++ ) {
@@ -109,13 +107,14 @@ public:
 				return text;
 			} else if constexpr ( std::is_same_v<T, std::vector<std::string>> ) {
 				if ( value->value_type != REG_MULTI_SZ )
-					return { };
+					return std::nullopt;
 
 				std::string text;
 				std::vector<std::string> out;
 				for ( auto j = 0; j < ( value->size & 0xffff ); j++ ) {
 					if ( data[j] == '\0' && data[j + 1] == '\0' && data[j + 2] == '\0' ) {
-						out.emplace_back( text );
+						if ( !text.empty( ) )
+							out.emplace_back( text );
 						text.clear( );
 					} else {
 						text += data[j];
@@ -125,12 +124,12 @@ public:
 				return out;
 			} else if constexpr ( std::is_same_v<T, int> ) {
 				if ( value->value_type != REG_DWORD )
-					return 0;
+					return std::nullopt;
 
 				return *reinterpret_cast<T*>( data );
 			} else if constexpr ( std::is_same_v<T, std::vector<uint8_t>> ) {
 				if ( value->value_type != REG_BINARY )
-					return {};
+					return std::nullopt;
 
 				std::vector<uint8_t> out;
 				out.reserve( value->size & 0xffff );
@@ -141,7 +140,7 @@ public:
 			}
 		}
 
-		return { };
+		return std::nullopt;
 	}
 };
 
@@ -214,6 +213,9 @@ public:
 		file.read( file_data.data( ), size );
 		file.close( );
 
+		if ( file_data.at( 0 ) != 'r' && file_data.at( 0 ) != 'e' && file_data.at( 0 ) != 'g' && file_data.at( 0 ) != 'f' )
+			return;
+
 		main_key_block_data = reinterpret_cast<key_block_t*>( reinterpret_cast<uintptr_t>( file_data.data( ) + 0x1020 ) );
 		main_root = reinterpret_cast<uintptr_t>( main_key_block_data ) - 0x20;
 
@@ -222,6 +224,9 @@ public:
 
 	explicit hive_parser( const std::vector<char>& input_data ) {
 		if ( input_data.size( ) < 0x1020 )
+			return;
+
+		if ( input_data.at( 0 ) != 'r' && input_data.at( 0 ) != 'e' && input_data.at( 0 ) != 'g' && input_data.at( 0 ) != 'f' )
 			return;
 
 		file_data = input_data;
@@ -236,9 +241,9 @@ public:
 		return !subkey_cache.empty( );
 	}
 
-	[[nodiscard]] hive_key_t get_subkey( const std::string& key_name, const std::string& path ) const {
+	[[nodiscard]] std::optional<hive_key_t> get_subkey( const std::string& key_name, const std::string& path ) const {
 		if ( !subkey_cache.contains( key_name ) )
-			return hive_key_t{ };
+			return std::nullopt;
 
 		const auto hive_block = subkey_cache.at( key_name );
 		for ( const auto& hive : hive_block.subpaths ) {
@@ -246,6 +251,6 @@ public:
 				return hive.data;
 		}
 
-		return hive_key_t{ };
+		return std::nullopt;
 	}
 };

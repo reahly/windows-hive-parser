@@ -16,12 +16,18 @@ int main( ) {
 
 	std::cout << std::endl << std::endl;
 
-	std::cout << "DelayedAutostart: " << a.get_key_value<int>( "DelayedAutostart" ) << std::endl;
-	std::cout << "DisplayName: " << a.get_key_value<std::string>( "DisplayName" ) << std::endl;
-	std::cout << "ImagePath: " << a.get_key_value<std::string>( "ImagePath" ) << std::endl;
+	std::cout << "DelayedAutostart: " << a.get_key_value<int>( "DelayedAutostart" ) << std::endl; //REG_DWORD type
+	std::cout << "DisplayName: " << a.get_key_value<std::string>( "DisplayName" ) << std::endl; //REG_STR type
+	std::cout << "ImagePath: " << a.get_key_value<std::string>( "ImagePath" ) << std::endl; //REG_EXPAND_SZ type
 
-	std::cout << "RequiredPrivileges: ";
+	std::cout << "RequiredPrivileges: "; //REG_MULTI_SZ type
 	for ( const auto& val : a.get_key_value<std::vector<std::string>>( "RequiredPrivileges" ) )
+		std::cout << val << ", ";
+
+        std::cout << std::endl;
+
+      	std::cout << "FailureActions: "; //REG_BINARY type
+        for ( const auto& val : a.get_key_value<std::vector<uint8_t>>( "FailureActions" ) )
 		std::cout << val << ", ";
 
 	std::cout << std::endl;

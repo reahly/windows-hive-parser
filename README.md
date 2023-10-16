@@ -1,4 +1,4 @@
-# windows-hive-parser-lib
+# windows-hive-parser
 
 Example Usage:
 ```c

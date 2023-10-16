@@ -98,7 +98,7 @@ public:
 				data = reinterpret_cast<char*>( &value->offset );
 
 			if constexpr ( std::is_same_v<T, std::string> ) {
-				if ( value->value_type != REG_SZ )
+				if ( value->value_type != REG_SZ && value->value_type != REG_EXPAND_SZ )
 					return "";
 
 				std::string text;

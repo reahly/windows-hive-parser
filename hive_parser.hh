@@ -98,7 +98,7 @@ public:
 				data = reinterpret_cast<char*>( &value->offset );
 
 			if constexpr ( std::is_same_v<T, std::string> ) {
-				if ( value->value_type != REG_SZ )
+				if ( value->value_type != REG_SZ && value->value_type != REG_EXPAND_SZ )
 					return "";
 
 				std::string text;
@@ -115,7 +115,9 @@ public:
 				std::vector<std::string> out;
 				for ( auto j = 0; j < ( value->size & 0xffff ); j++ ) {
 					if ( data[j] == '\0' && data[j + 1] == '\0' && data[j + 2] == '\0' ) {
-						out.emplace_back( text );
+						if ( !text.empty( ) )
+							out.emplace_back( text );
+						
 						text.clear( );
 					} else {
 						text += data[j];

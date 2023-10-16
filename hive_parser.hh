@@ -98,7 +98,7 @@ public:
 				data = reinterpret_cast<char*>( &value->offset );
 
 			if constexpr ( std::is_same_v<T, std::string> ) {
-				if ( value->value_type != REG_SZ && value->value_type != REG_EXPAND_SZ )
+				if ( value->value_type != REG_SZ )
 					return "";
 
 				std::string text;
@@ -115,9 +115,7 @@ public:
 				std::vector<std::string> out;
 				for ( auto j = 0; j < ( value->size & 0xffff ); j++ ) {
 					if ( data[j] == '\0' && data[j + 1] == '\0' && data[j + 2] == '\0' ) {
-						if ( !text.empty( ) )
-							out.emplace_back( text );
-						
+						out.emplace_back( text );
 						text.clear( );
 					} else {
 						text += data[j];
@@ -130,6 +128,16 @@ public:
 					return 0;
 
 				return *reinterpret_cast<T*>( data );
+			} else if constexpr ( std::is_same_v<T, std::vector<uint8_t>> ) {
+				if ( value->value_type != REG_BINARY )
+					return {};
+
+				std::vector<uint8_t> out;
+				out.reserve( value->size & 0xffff );
+				for ( auto j = 0; j < ( value->size & 0xffff ); j++ )
+					out.emplace_back( data[j] );
+
+				return out;
 			}
 		}
 
@@ -223,7 +231,6 @@ public:
 
 		reclusive_search( main_key_block_data, "" );
 	}
-
 
 	[[nodiscard]] bool success( ) const {
 		return !subkey_cache.empty( );

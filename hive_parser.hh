@@ -3,6 +3,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
 struct offsets_t {
 	long block_size;

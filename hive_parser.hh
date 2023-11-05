@@ -214,7 +214,7 @@ public:
 		file.read( file_data.data( ), size );
 		file.close( );
 
-		if ( file_data.at( 0 ) != 'r' && file_data.at( 0 ) != 'e' && file_data.at( 0 ) != 'g' && file_data.at( 0 ) != 'f' )
+		if ( file_data.at( 0 ) != 'r' && file_data.at( 1 ) != 'e' && file_data.at( 2 ) != 'g' && file_data.at( 3 ) != 'f' )
 			return;
 
 		main_key_block_data = reinterpret_cast<key_block_t*>( reinterpret_cast<uintptr_t>( file_data.data( ) + 0x1020 ) );
@@ -227,7 +227,7 @@ public:
 		if ( input_data.size( ) < 0x1020 )
 			return;
 
-		if ( input_data.at( 0 ) != 'r' && input_data.at( 0 ) != 'e' && input_data.at( 0 ) != 'g' && input_data.at( 0 ) != 'f' )
+		if ( input_data.at( 0 ) != 'r' && input_data.at( 1 ) != 'e' && input_data.at( 2 ) != 'g' && input_data.at( 3 ) != 'f' )
 			return;
 
 		file_data = input_data;

@@ -1,7 +1,14 @@
-# windows-hive-parser
+# Windows Hive File Parser
 
-Example Usage:
-```c
+A C++ library for parsing Windows Registry hive files
+
+## Example Usage
+
+Here's an example of how you can use this library to parse a registry hive file and retrieve information:
+
+```cpp
+#include "hive_parser.hh"
+
 int main( ) {
 	const auto parser = hive_parser( R"(C:\regdump\SYSTEM)" );
 	if ( !parser.success( ) )
@@ -46,8 +53,3 @@ int main( ) {
 
 	return 0;
 }
-```
-Output:
-
-![image](https://github.com/reahly/windows-hive-parser/assets/31766694/282f68c0-732a-4d0f-851f-c3b4d8512d6d)
-
